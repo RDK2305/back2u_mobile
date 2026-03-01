@@ -66,9 +66,13 @@ class AppConstants {
     'completed'
   ];
   
-  // User Roles
+  // User Roles (matches DB: student, security, professor)
   static const String roleStudent = 'student';
-  static const String roleSecurity = 'security';
+  static const String roleProfessor = 'professor';  // Also allowed on mobile
+  static const String roleSecurity = 'security';    // Blocked — use web portal
+
+  /// Roles allowed to use the mobile app (students and professors only)
+  static const List<String> allowedMobileRoles = ['student', 'professor'];
   
   // Storage Keys
   static const String storageKeyToken = 'auth_token';

@@ -5,8 +5,8 @@ class AppConfig {
   // For Android Emulator: 10.0.2.2 is the host machine IP
   // For physical device: Your PC/Mac IP address (e.g., 192.168.1.5:5000)
   
-  static const String baseUrl = 'http://localhost:5000/api';
-  // static const String baseUrl = 'http://back2u-h67h.onrender.com/api';
+  // static const String baseUrl = 'http://localhost:5000/api';
+  static const String baseUrl = 'https://back2u-h67h.onrender.com/api';
   // Or for Android emulator: 'http://10.0.2.2:5000/api'
   // Or for production: 'https://yourdomain.com/api'
 
@@ -26,7 +26,13 @@ class AppConfig {
   // App Defaults
   static const String appName = 'Back2U';
   static const String appVersion = '1.0.0';
-  static const Duration requestTimeout = Duration(seconds: 30);
+  // Increased to 60 s — backend is on Render free tier which cold-starts in
+  // up to 50 s after a period of inactivity.
+  static const Duration requestTimeout = Duration(seconds: 60);
+
+  // Extra-long timeout for endpoints that trigger email sending (SMTP can add
+  // another 10-15 s on top of the cold-start delay).
+  static const Duration emailRequestTimeout = Duration(seconds: 90);
   static const int itemsPerPage = 10;
 
   // Image Configuration
