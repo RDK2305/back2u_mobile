@@ -27,7 +27,7 @@ class AuthProvider extends GetxController {
     ever(isLoading, (loading) {
       if (!loading) {
         if (isLoggedIn.value) {
-          Get.offAllNamed(AppRoutes.home);
+          Get.offAllNamed(AppRoutes.main);
         } else {
           Get.offAllNamed(AppRoutes.login);
         }
@@ -79,7 +79,14 @@ class AuthProvider extends GetxController {
 
       final response = await _authService.login(email, password);
       if (response != null && response['user'] != null && response['token'] != null) {
-        // Corrected: Use setToken and setUserData, and await them.
+        // Block security role — mobile app is for students and professors only
+        final role = (response['user']['role'] ?? '').toString().toLowerCase();
+        if (role == 'security') {
+          errorMessage.value =
+              'Security staff must use the web portal.\nThis app is for students and professors only.';
+          return false;
+        }
+
         await StorageService.setToken(response['token']);
         await StorageService.setUserData(jsonEncode(response['user']));
         currentUser.value = User.fromMap(response['user']);
