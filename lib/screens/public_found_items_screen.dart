@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../services/api_service.dart';
 import '../services/auth_service.dart';
 import '../models/item.dart';
@@ -70,7 +71,13 @@ class _PublicFoundItemsScreenState extends State<PublicFoundItemsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Found Items')),
+      appBar: AppBar(
+        title: const Text('Found Items'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new),
+          onPressed: () => Get.back(),
+        ),
+      ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _foundItems.isEmpty
