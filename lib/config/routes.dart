@@ -1,34 +1,39 @@
 import 'package:get/get.dart';
-import '../screens/home_screen.dart';
+import '../screens/main_screen.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/auth/register_screen.dart';
+import '../screens/auth/forgot_password_screen.dart';
 import '../screens/report_lost_item_screen.dart';
-import '../screens/public_found_items_screen.dart';
+import '../screens/report_found_item_screen.dart';
+import '../screens/browse_items_screen.dart';
 import '../screens/my_items_screen.dart';
+import '../screens/my_claims_screen.dart';
 import '../screens/profile_screen.dart';
 import '../screens/settings_screen.dart';
+import '../screens/notifications_screen.dart';
 import '../screens/privacy_policy_screen.dart';
 import '../screens/terms_of_service_screen.dart';
 import '../screens/splash_screen.dart';
 
-/// Application Routes
-/// Define all named routes for navigation
 class AppRoutes {
   // Route names
   static const String splash = '/';
   static const String login = '/login';
   static const String register = '/register';
   static const String home = '/home';
+  static const String main = '/main';
   static const String reportLost = '/report-lost';
   static const String reportFound = '/report-found';
   static const String browseItems = '/browse-items';
   static const String myItems = '/my-items';
+  static const String myClaims = '/my-claims';
   static const String profile = '/profile';
+  static const String forgotPassword = '/forgot-password';
   static const String settings = '/settings';
+  static const String notifications = '/notifications';
   static const String privacyPolicy = '/privacy-policy';
   static const String termsOfService = '/terms-of-service';
 
-  // Get all routes
   static List<GetPage> getRoutes() {
     return [
       GetPage(
@@ -47,8 +52,18 @@ class AppRoutes {
         transition: Transition.fadeIn,
       ),
       GetPage(
+        name: forgotPassword,
+        page: () => const ForgotPasswordScreen(),
+        transition: Transition.rightToLeft,
+      ),
+      GetPage(
+        name: main,
+        page: () => const MainScreen(),
+        transition: Transition.fadeIn,
+      ),
+      GetPage(
         name: home,
-        page: () => const HomeScreen(),
+        page: () => const MainScreen(),
         transition: Transition.fadeIn,
       ),
       GetPage(
@@ -58,17 +73,22 @@ class AppRoutes {
       ),
       GetPage(
         name: reportFound,
-        page: () => const PublicFoundItemsScreen(),
+        page: () => const ReportFoundItemScreen(),
         transition: Transition.rightToLeft,
       ),
       GetPage(
         name: browseItems,
-        page: () => const PublicFoundItemsScreen(),
+        page: () => const BrowseItemsScreen(),
         transition: Transition.fadeIn,
       ),
       GetPage(
         name: myItems,
         page: () => const MyItemsScreen(),
+        transition: Transition.fadeIn,
+      ),
+      GetPage(
+        name: myClaims,
+        page: () => const MyClaimsScreen(),
         transition: Transition.fadeIn,
       ),
       GetPage(
@@ -79,6 +99,11 @@ class AppRoutes {
       GetPage(
         name: settings,
         page: () => const SettingsScreen(),
+        transition: Transition.rightToLeft,
+      ),
+      GetPage(
+        name: notifications,
+        page: () => const NotificationsScreen(),
         transition: Transition.rightToLeft,
       ),
       GetPage(

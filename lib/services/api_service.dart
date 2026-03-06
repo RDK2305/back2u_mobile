@@ -437,6 +437,177 @@ class ApiService {
     }
   }
 
+  // ============ Messages Endpoints ============
+
+  /// Get messages for a specific claim
+  Future<List<dynamic>> getClaimMessages(String token, int claimId) async {
+    try {
+      final response = await _dio.get(
+        '/messages/claim/$claimId',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      if (response.statusCode == 200) {
+        final data = response.data;
+        return data['data'] ?? data['messages'] ?? (data is List ? data : []);
+      }
+      return [];
+    } on DioException {
+      try {
+        final r2 = await _dio.get('/claims/$claimId/messages',
+            options: Options(headers: {'Authorization': 'Bearer $token'}));
+        if (r2.statusCode == 200) {
+          final d = r2.data;
+          return d['data'] ?? d['messages'] ?? (d is List ? d : []);
+        }
+      } catch (_) {}
+      return [];
+    }
+  }
+
+  /// Send a message for a claim
+  Future<Map<String, dynamic>> sendClaimMessage(
+    String token,
+    int claimId,
+    int receiverId,
+    String message,
+  ) async {
+    try {
+      final response = await _dio.post(
+        '/messages',
+        data: {'claim_id': claimId, 'receiver_id': receiverId, 'message': message},
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        return response.data is Map<String, dynamic>
+            ? response.data as Map<String, dynamic>
+            : {'success': true};
+      }
+      throw Exception('Failed to send message');
+    } on DioException catch (e) {
+      throw Exception(_getErrorMessage(e));
+    }
+  }
+
+  // ============ Auth — Forgot Password / OTP ============
+
+  /// Request OTP for password reset.
+  /// Returns [true] when the email exists in the DB and OTP was sent.
+  /// Returns [false] when the email is NOT registered (backend responds 200
+  /// but without the "info" field, meaning the email was not found).
+  /// Uses a 90-second timeout: Render cold-start (~50 s) + SMTP (~10 s).
+  Future<bool> forgotPassword(String email) async {
+    try {
+      final response = await _dio.post(
+        '/auth/forgot-password',
+        data: {'email': email},
+        options: Options(
+          receiveTimeout: AppConfig.emailRequestTimeout,
+          sendTimeout: AppConfig.emailRequestTimeout,
+        ),
+      );
+      // Backend sends { message, info } when email found and OTP sent.
+      // When email not found it omits "info" entirely.
+      final data = response.data;
+      if (data is Map && data.containsKey('info')) {
+        return true; // email found, OTP sent
+      }
+      return false; // email not registered
+    } on DioException catch (e) {
+      throw Exception(_getErrorMessage(e));
+    }
+  }
+
+  /// Verify OTP code — returns the resetToken JWT on success, null on failure.
+  /// Uses 60-second timeout to handle Render cold-start delays.
+  Future<String?> verifyOtp(String email, String otp) async {
+    try {
+      final response = await _dio.post(
+        '/auth/verify-otp',
+        data: {'email': email, 'otp': otp},
+        options: Options(
+          receiveTimeout: AppConfig.requestTimeout,
+          sendTimeout: AppConfig.requestTimeout,
+        ),
+      );
+      if (response.statusCode == 200) {
+        // Backend returns { verified: true, resetToken: "..." }
+        return response.data['resetToken'] as String?;
+      }
+      return null;
+    } on DioException catch (e) {
+      throw Exception(_getErrorMessage(e));
+    }
+  }
+
+  /// Reset password after OTP verification.
+  /// [resetToken] is the JWT returned by verifyOtp — sent as Bearer token.
+  /// Body uses camelCase [newPassword] as expected by the backend.
+  Future<void> resetPassword(
+    String email,
+    String otp,
+    String newPassword, {
+    String? resetToken,
+  }) async {
+    try {
+      await _dio.post(
+        '/auth/reset-password',
+        data: {'email': email, 'otp': otp, 'newPassword': newPassword},
+        options: Options(
+          receiveTimeout: AppConfig.requestTimeout,
+          sendTimeout: AppConfig.requestTimeout,
+          headers: resetToken != null
+              ? {'Authorization': 'Bearer $resetToken'}
+              : null,
+        ),
+      );
+    } on DioException catch (e) {
+      throw Exception(_getErrorMessage(e));
+    }
+  }
+
+  // ============ Notifications Endpoints ============
+
+  /// Get user notifications
+  Future<List<dynamic>> getNotifications(String token) async {
+    try {
+      final response = await _dio.get(
+        '/notifications',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      if (response.statusCode == 200) {
+        final data = response.data;
+        return data['data'] ?? data['notifications'] ?? [];
+      }
+      return [];
+    } on DioException {
+      return [];
+    }
+  }
+
+  /// Mark a single notification as read
+  Future<void> markNotificationRead(String token, int id) async {
+    try {
+      await _dio.put(
+        '/notifications/$id/read',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+    } on DioException {
+      // Ignore silently
+    }
+  }
+
+  /// Mark all notifications as read
+  Future<void> markAllNotificationsRead(String token) async {
+    try {
+      await _dio.put(
+        '/notifications/read-all',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+    } on DioException {
+      // Ignore silently
+    }
+  }
+
   // ============ Error Handling ============
 
   /// Get readable error message from DioException
@@ -447,8 +618,18 @@ class ApiService {
       case DioExceptionType.receiveTimeout:
         return 'Connection timeout. Please check your internet connection.';
       case DioExceptionType.badResponse:
-        return error.response?.data?['message'] ??
-            'Server error: ${error.response?.statusCode}';
+        final data = error.response?.data;
+        if (data is Map) {
+          // Backend may return { message: "...", errors: ["...", "..."] }
+          final msg = data['message'] as String? ?? '';
+          final errors = data['errors'];
+          if (errors is List && errors.isNotEmpty) {
+            final details = errors.map((e) => '• $e').join('\n');
+            return msg.isNotEmpty ? '$msg\n$details' : details;
+          }
+          if (msg.isNotEmpty) return msg;
+        }
+        return 'Server error: ${error.response?.statusCode}';
       case DioExceptionType.cancel:
         return 'Request cancelled';
       case DioExceptionType.unknown:
