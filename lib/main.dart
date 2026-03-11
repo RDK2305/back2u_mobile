@@ -6,19 +6,23 @@ import 'config/routes.dart';
 import 'providers/auth_provider.dart';
 import 'providers/item_provider.dart';
 import 'providers/theme_provider.dart';
+import 'providers/claim_provider.dart';
+import 'providers/notification_provider.dart';
 import 'services/storage_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize storage service
   await StorageService.init();
-  
+
   // Initialize providers
   Get.put(AuthProvider());
   Get.put(ItemProvider());
   Get.put(ThemeProvider());
-  
+  Get.put(ClaimProvider());
+  Get.put(NotificationProvider());
+
   runApp(const MyApp());
 }
 
