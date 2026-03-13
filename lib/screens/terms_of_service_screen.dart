@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class TermsOfServiceScreen extends StatelessWidget {
   const TermsOfServiceScreen({super.key});
@@ -9,6 +10,10 @@ class TermsOfServiceScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Terms of Service'),
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new),
+          onPressed: () => Get.back(),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(0),

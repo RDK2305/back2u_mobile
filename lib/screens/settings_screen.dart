@@ -60,6 +60,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
       appBar: AppBar(
         title: const Text('Settings'),
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new),
+          onPressed: () => Get.back(),
+        ),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -79,7 +83,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       trailing: Switch(
                         value: _notificationsEnabled,
                         onChanged: _setNotifications,
-                        activeColor: Colors.blue,
+                        activeThumbColor: Colors.blue,
                       ),
                     ),
                   ),
@@ -97,7 +101,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         trailing: Switch(
                           value: _themeProvider.isDarkMode.value,
                           onChanged: _setDarkMode,
-                          activeColor: Colors.blue,
+                          activeThumbColor: Colors.blue,
                         ),
                       ),
                     ),
