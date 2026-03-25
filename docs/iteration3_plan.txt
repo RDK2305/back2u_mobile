@@ -1,0 +1,17 @@
+﻿Iteration 3 Plan - Back2U Flutter Application
+===============================================
+Features (Student-facing):
+  1. Messages Inbox Screen
+  2. Unread Messages Badge on nav
+  3. Rating Bottom Sheet on Claim Detail
+  4. My Ratings Screen (history + breakdown)
+  5. Profile Rating Card + expanded Quick Actions
+  6. Saved Items Screen (local SharedPreferences)
+  7. Bookmark toggle on Item Detail
+  8. Help and FAQ Screen (fully offline)
+
+Timeline : Mar 25 - Apr 6, 2026
+Lead     : Rudraksh Kharadi (Full Stack)
+Frontend : Gagan Singh
+Backend  : Gurjant Singh
+Docs/DB  : Bishal Paudel
