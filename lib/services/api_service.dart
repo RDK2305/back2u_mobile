@@ -565,6 +565,123 @@ class ApiService {
     }
   }
 
+  // ============ Messages — Inbox ============
+
+  /// Get user's full message inbox (all conversations grouped by claim)
+  Future<List<dynamic>> getMessageInbox(String token) async {
+    try {
+      final response = await _dio.get(
+        '/messages/inbox',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      if (response.statusCode == 200) {
+        final data = response.data;
+        return data['data'] ?? data['messages'] ?? [];
+      }
+      return [];
+    } on DioException {
+      return [];
+    }
+  }
+
+  /// Get unread message count
+  Future<int> getUnreadMessageCount(String token) async {
+    try {
+      final response = await _dio.get(
+        '/messages/unread/count',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      if (response.statusCode == 200) {
+        return response.data['unread_count'] ?? 0;
+      }
+      return 0;
+    } on DioException {
+      return 0;
+    }
+  }
+
+  // ============ Ratings Endpoints ============
+
+  /// Submit a rating for a user after a claim is resolved
+  Future<Map<String, dynamic>> submitRating(
+    String token, {
+    required int claimId,
+    required int rateeId,
+    required int rating,
+    String? comment,
+  }) async {
+    try {
+      final response = await _dio.post(
+        '/ratings',
+        data: {
+          'claim_id': claimId,
+          'ratee_id': rateeId,
+          'rating': rating,
+          if (comment != null && comment.isNotEmpty) 'comment': comment,
+        },
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return response.data is Map<String, dynamic>
+            ? response.data as Map<String, dynamic>
+            : {'success': true};
+      }
+      throw Exception('Failed to submit rating');
+    } on DioException catch (e) {
+      throw Exception(_getErrorMessage(e));
+    }
+  }
+
+  /// Get ratings received by a user
+  Future<Map<String, dynamic>> getUserRatings(String token, int userId) async {
+    try {
+      final response = await _dio.get(
+        '/ratings/user/$userId',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      if (response.statusCode == 200) {
+        return response.data is Map<String, dynamic>
+            ? response.data as Map<String, dynamic>
+            : {};
+      }
+      return {};
+    } on DioException {
+      return {};
+    }
+  }
+
+  /// Get average rating for a user (public)
+  Future<Map<String, dynamic>> getUserAverageRating(int userId) async {
+    try {
+      final response = await _dio.get('/ratings/user/$userId/average');
+      if (response.statusCode == 200) {
+        return response.data is Map<String, dynamic>
+            ? response.data as Map<String, dynamic>
+            : {};
+      }
+      return {};
+    } on DioException {
+      return {};
+    }
+  }
+
+  /// Get ratings for a specific claim
+  Future<List<dynamic>> getClaimRatings(String token, int claimId) async {
+    try {
+      final response = await _dio.get(
+        '/ratings/claim/$claimId',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      if (response.statusCode == 200) {
+        final data = response.data;
+        return data['data'] ?? [];
+      }
+      return [];
+    } on DioException {
+      return [];
+    }
+  }
+
   // ============ Notifications Endpoints ============
 
   /// Get user notifications
