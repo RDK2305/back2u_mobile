@@ -2,9 +2,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../models/claim.dart';
+import '../models/rating.dart';
 import '../providers/auth_provider.dart';
 import '../providers/claim_provider.dart';
 import '../config/theme.dart';
+import '../services/api_service.dart';
+import '../services/auth_service.dart';
 
 class ClaimDetailScreen extends StatefulWidget {
   final Claim claim;
@@ -112,6 +115,257 @@ class _ClaimDetailScreenState extends State<ClaimDetailScreen> {
     }
   }
 
+  // ── Rating ──────────────────────────────────────────────────────────────────
+
+  Future<void> _showRatingSheet(Claim claim, int? currentUserId) async {
+    final rateeId = claim.claimerId == currentUserId
+        ? claim.ownerId
+        : claim.claimerId;
+
+    // Check if already rated
+    Rating? existing;
+    try {
+      final token = AuthService().getToken() ?? '';
+      final raw = await ApiService().getClaimRatings(token, claim.id);
+      for (final r in raw) {
+        final rating = Rating.fromMap(r);
+        if (rating.raterId == currentUserId) {
+          existing = rating;
+          break;
+        }
+      }
+    } catch (_) {}
+
+    if (!mounted) return;
+
+    int selectedStars = existing?.rating ?? 0;
+    final commentCtrl =
+        TextEditingController(text: existing?.comment ?? '');
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setSheetState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 24,
+                right: 24,
+                top: 24,
+                bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Handle
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Title
+                  Row(
+                    children: [
+                      const Icon(Icons.star, color: Colors.amber, size: 28),
+                      const SizedBox(width: 10),
+                      Text(
+                        existing != null ? 'Update Your Rating' : 'Rate User',
+                        style: Theme.of(ctx).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Share your experience with this claim',
+                    style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(
+                          color: AppTheme.textSecondaryColor,
+                        ),
+                  ),
+
+                  if (existing != null) ...[
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                            color: Colors.amber.withValues(alpha: 0.3)),
+                      ),
+                      child: Text(
+                        'You previously gave ${existing.rating} ⭐. Submitting will update your rating.',
+                        style: const TextStyle(
+                            fontSize: 12, color: Colors.orange),
+                      ),
+                    ),
+                  ],
+
+                  const SizedBox(height: 20),
+
+                  // Star row
+                  Center(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: List.generate(5, (i) {
+                        final star = i + 1;
+                        return GestureDetector(
+                          onTap: () =>
+                              setSheetState(() => selectedStars = star),
+                          child: Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 4),
+                            child: Icon(
+                              star <= selectedStars
+                                  ? Icons.star
+                                  : Icons.star_outline,
+                              color: Colors.amber,
+                              size: 44,
+                            ),
+                          ),
+                        );
+                      }),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Center(
+                    child: Text(
+                      _starLabel(selectedStars),
+                      style: TextStyle(
+                        color: selectedStars > 0
+                            ? Colors.amber[800]
+                            : AppTheme.textSecondaryColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // Comment field
+                  TextField(
+                    controller: commentCtrl,
+                    maxLines: 3,
+                    maxLength: 500,
+                    decoration: InputDecoration(
+                      labelText: 'Comment (optional)',
+                      hintText: 'Share your experience...',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Submit button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: selectedStars == 0
+                          ? null
+                          : () async {
+                              Navigator.pop(ctx);
+                              await _submitRating(
+                                claim: claim,
+                                rateeId: rateeId ?? 0,
+                                stars: selectedStars,
+                                comment: commentCtrl.text.trim(),
+                              );
+                            },
+                      icon: const Icon(Icons.star),
+                      label: Text(
+                          existing != null ? 'Update Rating' : 'Submit Rating'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.amber[700],
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                        disabledBackgroundColor: Colors.grey[300],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+    commentCtrl.dispose();
+  }
+
+  String _starLabel(int stars) {
+    switch (stars) {
+      case 1:
+        return '😞 Poor';
+      case 2:
+        return '😐 Fair';
+      case 3:
+        return '🙂 Good';
+      case 4:
+        return '😊 Very Good';
+      case 5:
+        return '🤩 Excellent!';
+      default:
+        return 'Tap a star to rate';
+    }
+  }
+
+  Future<void> _submitRating({
+    required Claim claim,
+    required int rateeId,
+    required int stars,
+    required String comment,
+  }) async {
+    try {
+      final token = AuthService().getToken() ?? '';
+      await ApiService().submitRating(
+        token,
+        claimId: claim.id,
+        rateeId: rateeId,
+        rating: stars,
+        comment: comment.isEmpty ? null : comment,
+      );
+      if (mounted) {
+        Get.snackbar(
+          'Rating Submitted ⭐',
+          'You gave $stars star${stars == 1 ? '' : 's'}. Thank you!',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.amber[700],
+          colorText: Colors.white,
+          duration: const Duration(seconds: 3),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        Get.snackbar(
+          'Error',
+          e.toString().replaceFirst('Exception: ', ''),
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: AppTheme.errorColor,
+          colorText: Colors.white,
+        );
+      }
+    }
+  }
+
+  // ── Cancel Claim ────────────────────────────────────────────────────────────
+
   Future<void> _cancelClaim() async {
     final confirm = await showDialog<bool>(
       context: context,
@@ -158,6 +412,13 @@ class _ClaimDetailScreenState extends State<ClaimDetailScreen> {
           onPressed: () => Get.back(),
         ),
         actions: [
+          // Rate User button for verified/completed claims
+          if (claim.status == 'verified' || claim.status == 'completed')
+            IconButton(
+              icon: const Icon(Icons.star_outline, color: Colors.amber),
+              tooltip: 'Rate User',
+              onPressed: () => _showRatingSheet(claim, currentUserId),
+            ),
           if (claim.status == 'pending' && claim.claimerId == currentUserId)
             PopupMenuButton<String>(
               itemBuilder: (_) => [
