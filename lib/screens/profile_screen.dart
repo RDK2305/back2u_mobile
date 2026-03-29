@@ -8,6 +8,8 @@ import '../config/routes.dart';
 import '../config/theme.dart';
 import 'settings_screen.dart';
 import 'notifications_screen.dart';
+import 'messages_inbox_screen.dart';
+import 'my_ratings_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -24,10 +26,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isLoading = false;
   bool _isEditing = false;
 
+  // Rating state
+  double _avgRating = 0;
+  int _totalRatings = 0;
+  bool _ratingsLoaded = false;
+
   @override
   void initState() {
     super.initState();
     _populateFields();
+    _loadRatings();
+  }
+
+  Future<void> _loadRatings() async {
+    try {
+      final user = Get.find<AuthProvider>().currentUser.value;
+      if (user == null) return;
+      final data = await ApiService().getUserAverageRating(user.id);
+      if (mounted) {
+        setState(() {
+          _avgRating = double.tryParse(
+                  data['average']?.toString() ??
+                  data['avg_rating']?.toString() ?? '0') ??
+              0;
+          _totalRatings = data['total'] ?? data['total_ratings'] ?? 0;
+          _ratingsLoaded = true;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _ratingsLoaded = true);
+    }
   }
 
   void _populateFields() {
@@ -290,6 +318,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     _buildInfoSection(user),
                     const SizedBox(height: 20),
 
+                    // ⭐ Rating card
+                    _buildRatingCard(),
+                    const SizedBox(height: 20),
+
                     // Quick actions row
                     _buildQuickActions(notifProvider),
                     const SizedBox(height: 20),
@@ -346,6 +378,110 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 value: user.program!,
                 color: AppTheme.warningColor),
           ],
+        ],
+      ),
+    );
+  }
+
+  // ── Rating Card ──────────────────────────────────────────────────────────────
+  Widget _buildRatingCard() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.amber.shade50,
+            Colors.orange.shade50,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
+        boxShadow: [AppTheme.shadowSmall],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.star_rounded, color: Colors.amber, size: 22),
+              const SizedBox(width: 8),
+              Text('My Rating',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.amber[900],
+                      )),
+              const Spacer(),
+              TextButton.icon(
+                onPressed: () => Get.to(() => const MyRatingsScreen()),
+                icon: const Icon(Icons.star_rounded,
+                    size: 16, color: Colors.amber),
+                label: const Text('See All'),
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.amber[800],
+                  padding: EdgeInsets.zero,
+                  visualDensity: VisualDensity.compact,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          if (!_ratingsLoaded)
+            const Center(
+              child: SizedBox(
+                height: 24,
+                width: 24,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            )
+          else if (_totalRatings == 0)
+            Text(
+              'No ratings yet. Complete a claim to receive ratings from other students.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppTheme.textSecondaryColor,
+                  ),
+            )
+          else
+            Row(
+              children: [
+                // Stars
+                Row(
+                  children: List.generate(5, (i) {
+                    final filled = i < _avgRating.floor();
+                    final half = !filled &&
+                        i < _avgRating &&
+                        (_avgRating - i) >= 0.5;
+                    return Icon(
+                      filled
+                          ? Icons.star_rounded
+                          : half
+                              ? Icons.star_half_rounded
+                              : Icons.star_outline_rounded,
+                      color: Colors.amber,
+                      size: 28,
+                    );
+                  }),
+                ),
+                const SizedBox(width: 10),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _avgRating.toStringAsFixed(1),
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.amber[800],
+                          ),
+                    ),
+                    Text(
+                      '$_totalRatings rating${_totalRatings == 1 ? '' : 's'}',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: AppTheme.textSecondaryColor,
+                          ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
         ],
       ),
     );
@@ -452,6 +588,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 color: AppTheme.successColor,
                 badge: const SizedBox.shrink(),
                 onTap: () => Get.toNamed(AppRoutes.myItems),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Expanded(
+              child: _quickActionCard(
+                icon: Icons.bookmark_outlined,
+                label: 'Saved Items',
+                color: AppTheme.warningColor,
+                badge: const SizedBox.shrink(),
+                onTap: () => Get.toNamed(AppRoutes.savedItems),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _quickActionCard(
+                icon: Icons.message_outlined,
+                label: 'Messages',
+                color: const Color(0xFF8B5CF6),
+                badge: const SizedBox.shrink(),
+                onTap: () => Get.to(() => const MessagesInboxScreen()),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _quickActionCard(
+                icon: Icons.star_outlined,
+                label: 'My Ratings',
+                color: Colors.amber[700]!,
+                badge: const SizedBox.shrink(),
+                onTap: () => Get.toNamed(AppRoutes.myRatings),
               ),
             ),
           ],
