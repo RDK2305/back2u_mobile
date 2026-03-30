@@ -6,6 +6,7 @@ import '../providers/auth_provider.dart';
 import '../providers/claim_provider.dart';
 import '../config/theme.dart';
 import 'claim_detail_screen.dart';
+import 'saved_items_screen.dart';
 
 class ItemDetailScreen extends StatefulWidget {
   final Item item;
@@ -22,11 +23,34 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
   bool _alreadyClaimed = false;
   bool _checkingClaim = true;
   int? _existingClaimId;
+  bool _isSaved = false;
 
   @override
   void initState() {
     super.initState();
     _checkExistingClaim();
+    _checkIfSaved();
+  }
+
+  Future<void> _checkIfSaved() async {
+    final saved = await SavedItemsScreen.isSaved(widget.item.id);
+    if (mounted) setState(() => _isSaved = saved);
+  }
+
+  Future<void> _toggleSave() async {
+    final nowSaved = await SavedItemsScreen.toggleSave(widget.item.id);
+    if (mounted) setState(() => _isSaved = nowSaved);
+    Get.snackbar(
+      nowSaved ? 'Saved!' : 'Removed',
+      nowSaved
+          ? 'Item added to your saved list'
+          : 'Item removed from saved',
+      snackPosition: SnackPosition.BOTTOM,
+      duration: const Duration(seconds: 2),
+      backgroundColor:
+          nowSaved ? AppTheme.successColor : AppTheme.textSecondaryColor,
+      colorText: Colors.white,
+    );
   }
 
   Future<void> _checkExistingClaim() async {
@@ -69,6 +93,16 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
               icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
               onPressed: () => Get.back(),
             ),
+            actions: [
+              IconButton(
+                icon: Icon(
+                  _isSaved ? Icons.bookmark : Icons.bookmark_border,
+                  color: Colors.white,
+                ),
+                tooltip: _isSaved ? 'Remove from saved' : 'Save item',
+                onPressed: _toggleSave,
+              ),
+            ],
             flexibleSpace: FlexibleSpaceBar(
               background: item.displayImageUrl != null
                   ? CachedNetworkImage(
