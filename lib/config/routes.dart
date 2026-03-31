@@ -14,6 +14,10 @@ import '../screens/notifications_screen.dart';
 import '../screens/privacy_policy_screen.dart';
 import '../screens/terms_of_service_screen.dart';
 import '../screens/splash_screen.dart';
+import '../screens/messages_inbox_screen.dart';
+import '../screens/my_ratings_screen.dart';
+import '../screens/saved_items_screen.dart';
+import '../screens/help_faq_screen.dart';
 
 class AppRoutes {
   // Route names
@@ -31,6 +35,10 @@ class AppRoutes {
   static const String forgotPassword = '/forgot-password';
   static const String settings = '/settings';
   static const String notifications = '/notifications';
+  static const String messages = '/messages';
+  static const String myRatings = '/my-ratings';
+  static const String savedItems = '/saved-items';
+  static const String helpFaq = '/help-faq';
   static const String privacyPolicy = '/privacy-policy';
   static const String termsOfService = '/terms-of-service';
 
@@ -104,6 +112,26 @@ class AppRoutes {
       GetPage(
         name: notifications,
         page: () => const NotificationsScreen(),
+        transition: Transition.rightToLeft,
+      ),
+      GetPage(
+        name: messages,
+        page: () => const MessagesInboxScreen(),
+        transition: Transition.rightToLeft,
+      ),
+      GetPage(
+        name: myRatings,
+        page: () => const MyRatingsScreen(),
+        transition: Transition.rightToLeft,
+      ),
+      GetPage(
+        name: savedItems,
+        page: () => const SavedItemsScreen(),
+        transition: Transition.rightToLeft,
+      ),
+      GetPage(
+        name: helpFaq,
+        page: () => const HelpFaqScreen(),
         transition: Transition.rightToLeft,
       ),
       GetPage(
