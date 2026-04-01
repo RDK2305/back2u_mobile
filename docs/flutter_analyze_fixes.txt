@@ -1,0 +1,21 @@
+﻿Flutter Analyze Issues Resolved — Rudraksh Kharadi — Apr 1, 2026
+===================================================================
+Issue 1: claim_detail_screen.dart:210 - unnecessary_non_null_assertion
+  Fix: existing!.rating -> existing.rating (inside null-check scope)
+
+Issue 2: claim_detail_screen.dart:284 - argument_type_not_assignable
+  Fix: rateeId -> rateeId ?? 0 (int? to int coercion)
+
+Issue 3: messages_inbox_screen.dart:24 - unused_field _claimProvider
+  Fix: Removed unused declaration and import
+
+Issue 4: profile_screen.dart:9 - unused_import rating.dart
+  Fix: Removed unused import
+
+Issue 5: messages_inbox_screen.dart:233 - unnecessary_underscores
+  Fix: (_, __) -> (context, index) named parameters
+
+Issue 6: saved_items_screen.dart - static helpers on private _State class
+  Fix: Moved toggleSave, isSaved, getSavedIds to public SavedItemsScreen class
+
+Final: flutter analyze --no-fatal-infos -> No issues found!
