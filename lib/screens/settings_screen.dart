@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/theme_provider.dart';
 import 'privacy_policy_screen.dart';
 import 'terms_of_service_screen.dart';
+import 'help_faq_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -118,6 +119,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ListTile(
                           title: const Text('App Version'),
                           trailing: const Text('1.0.0'),
+                        ),
+                        const Divider(height: 1),
+                        ListTile(
+                          leading: const Icon(Icons.help_outline_rounded,
+                              color: Color(0xFF1E3A8A)),
+                          title: const Text('Help & FAQ'),
+                          subtitle: const Text('How the app works, common questions'),
+                          trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                          onTap: () => Get.to(() => const HelpFaqScreen()),
                         ),
                         const Divider(height: 1),
                         ListTile(
