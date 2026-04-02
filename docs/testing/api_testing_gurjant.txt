@@ -1,0 +1,18 @@
+﻿=== API SERVICE TESTING — GURJANT SINGH — Apr 2, 2026 ===
+
+Method                     Endpoint                          Result
+getMessageInbox()          GET /messages/inbox               [PASS]
+getUnreadMessageCount()    GET /messages/unread/count        [PASS]
+sendClaimMessage()         POST /messages                    [PASS]
+getClaimMessages()         GET /messages/claim/:id           [PASS]
+submitRating()             POST /ratings                     [PASS]
+getUserRatings()           GET /ratings/user/:id             [PASS]
+getUserAverageRating()     GET /ratings/user/:id/average     [PASS]
+getClaimRatings()          GET /ratings/claim/:id            [PASS]
+getNotifications()         GET /notifications                [PASS]
+markNotificationRead()     PUT /notifications/:id/read       [PASS]
+markAllNotificationsRead() PUT /notifications/read-all       [PASS]
+
+All 11 API methods: PASSED
+Auth token correctly attached via Dio interceptor.
+Tester: Gurjant Singh
