@@ -1,0 +1,23 @@
+﻿=== FLUTTER UI TESTING — GAGAN SINGH — Apr 3, 2026 ===
+
+Screen                  Test                                     Result
+MessagesInboxScreen     Conversation list renders                 [PASS]
+MessagesInboxScreen     Search filter works in real-time         [PASS]
+MessagesInboxScreen     Unread red dot visible                    [PASS]
+MyRatingsScreen         Summary gradient card shows avg score     [PASS]
+MyRatingsScreen         Breakdown bars show correct percentages   [PASS]
+MyRatingsScreen         Review tiles with quoted comments         [PASS]
+SavedItemsScreen        Saved items load from SharedPrefs         [PASS]
+SavedItemsScreen        Swipe-to-dismiss removes item             [PASS]
+SavedItemsScreen        Empty state shown when no saves           [PASS]
+ItemDetailScreen        Bookmark icon toggles filled/outline      [PASS]
+ItemDetailScreen        Save state persists after app restart     [PASS]
+HelpFaqScreen           FAQ accordion expands and collapses       [PASS]
+HelpFaqScreen           Multiple FAQ items can be open together   [PASS]
+HelpFaqScreen           Works fully offline (no network)          [PASS]
+ProfileScreen           Rating card shows stars correctly         [PASS]
+ProfileScreen           Quick Actions row 2 navigates correctly   [PASS]
+
+Total: 16/16 UI tests PASSED
+Tested on: Android Emulator (API 34) + Physical Android device
+Tester: Gagan Singh
