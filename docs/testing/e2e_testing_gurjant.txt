@@ -1,0 +1,22 @@
+﻿=== END-TO-END TESTING — GURJANT SINGH — Apr 4, 2026 ===
+
+Flow 1: Send and Receive Message
+  Login -> My Claims -> Open claim -> Chat -> Send msg -> Other user replies  [PASS]
+
+Flow 2: Submit and View Rating
+  Login -> My Claims -> Completed claim -> Star icon -> 4 stars + comment -> Submit
+  -> Profile -> See All -> My Ratings shows new review                        [PASS]
+
+Flow 3: Save and Retrieve Item
+  Browse -> Open item -> Tap bookmark -> Profile -> Saved Items -> Item listed
+  -> Reopen app -> Saved Items -> Still there (persisted via SharedPrefs)     [PASS]
+
+Flow 4: Unread Messages Badge
+  Other user sends message -> Open app -> Claims tab shows red badge
+  -> Open Messages Inbox -> Badge count reflects correct number               [PASS]
+
+Flow 5: Help and FAQ Offline
+  Disable WiFi -> Settings -> Help & FAQ -> Full content visible, no errors   [PASS]
+
+5/5 end-to-end flows PASSED.
+Tester: Gurjant Singh
