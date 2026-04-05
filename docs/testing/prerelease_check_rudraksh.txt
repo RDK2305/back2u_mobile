@@ -1,0 +1,14 @@
+﻿Pre-Release Checklist — Rudraksh Kharadi — Apr 5, 2026
+=========================================================
+[x] flutter analyze: No issues found
+[x] All 8 new screens navigate correctly from their entry points
+[x] All 11 API endpoints functional
+[x] Saved items persist after full app restart
+[x] Offline features (Help FAQ) work without any network
+[x] Rating flow: submit -> profile card -> My Ratings screen
+[x] Messages inbox shows unread badge on bottom nav
+[x] Help FAQ accessible from Settings
+[x] Documentation complete and reviewed
+
+FINAL STATUS: APPROVED FOR RELEASE
+Sign-off: Rudraksh Kharadi (Team Lead)
