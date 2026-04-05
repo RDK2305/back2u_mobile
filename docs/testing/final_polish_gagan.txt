@@ -1,0 +1,8 @@
+﻿Final UI Polish — Gagan Singh — Apr 5, 2026
+=============================================
+- SavedItemsScreen: swipe dismiss animation smoothed
+- MyRatingsScreen: half-star icon corrected for 3.5 average
+- HelpFaqScreen: step connector lines aligned vertically
+- ProfileScreen: second Quick Actions row spacing tightened
+- ItemDetailScreen: bookmark icon persists correctly on back navigation
+All refinements applied and verified on emulator and physical device.
