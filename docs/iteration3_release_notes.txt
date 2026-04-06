@@ -1,0 +1,34 @@
+﻿ITERATION 3 RELEASE NOTES — Flutter App
+=========================================
+Date    : Apr 6, 2026
+Version : 3.0.0
+Status  : RELEASED
+
+New Screens (4):
+  MessagesInboxScreen  - Conversation inbox with search and unread indicator
+  MyRatingsScreen      - Rating history with breakdown bars and review tiles
+  SavedItemsScreen     - Local bookmark system using SharedPreferences
+  HelpFaqScreen        - Offline FAQ with accordion and how-it-works steps
+
+Modified Screens (5):
+  ClaimDetailScreen    - Added 5-star rating bottom sheet
+  MainScreen           - Added reactive unread messages badge
+  ProfileScreen        - Added rating card and expanded quick actions
+  ItemDetailScreen     - Added bookmark toggle icon
+  SettingsScreen       - Added Help and FAQ link
+
+New Model (1):
+  rating.dart          - Rating and UserRatingSummary model classes
+
+API Methods Added (6):
+  getMessageInbox, getUnreadMessageCount, submitRating,
+  getUserRatings, getUserAverageRating, getClaimRatings
+
+Code Quality:
+  flutter analyze: No issues found (0 errors, 0 warnings)
+
+Team:
+  Rudraksh Kharadi - Team Lead / Full Stack
+  Bishal Paudel    - Database / Documentation
+  Gagan Singh      - Frontend Developer
+  Gurjant Singh    - Backend / Database
